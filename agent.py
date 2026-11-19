@@ -41,7 +41,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         # غیرفعال کردن automatic_function_calling تا تابع async را خودمان دستی اجرا کنیم
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.8-flash",
             contents=(
                 f"درخواست کاربر: {user_message}\n"
                 "اگر نیاز به باز کردن مرورگر، وب‌گردی یا بررسی سایت است از ابزار open_browser_and_search استفاده کن؛ "
