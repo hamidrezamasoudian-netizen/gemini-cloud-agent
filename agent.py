@@ -1,12 +1,10 @@
 import os
-import asyncio
 from google import genai
 from google.genai import types
 from playwright.async_api import async_playwright
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 
-# خواندن کلیدها از متغیرهای محیطی امن (GitHub Secrets)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 
@@ -41,11 +39,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🤖 پیام شما دریافت شد؛ ایجنت ابری در حال بررسی است...")
 
     try:
+        # غیرفعال کردن automatic_function_calling تا تابع async را خودمان دستی اجرا کنیم
         response = client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=f"درخواست کاربر: {user_message}\nاگر نیاز به باز کردن مرورگر، وب‌گردی یا بررسی سایت است از ابزار open_browser_and_search استفاده کن؛ در غیر این صورت پاسخ مستقیم و مفید بده.",
+            contents=(
+                f"درخواست کاربر: {user_message}\n"
+                "اگر نیاز به باز کردن مرورگر، وب‌گردی یا بررسی سایت است از ابزار open_browser_and_search استفاده کن؛ "
+                "در غیر این صورت پاسخ مستقیم و مفید بده."
+            ),
             config=types.GenerateContentConfig(
                 tools=[open_browser_and_search],
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
                 temperature=0.2,
             ),
         )
@@ -53,7 +57,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if response.function_calls:
             for call in response.function_calls:
                 if call.name == "open_browser_and_search":
-                    query_arg = call.args.get("query", user_message)
+                    query_arg = call.args.get("query", user_message) if call.args else user_message
                     await update.message.reply_text(
                         f"🌐 در حال اجرای مرورگر ابری برای: {query_arg}"
                     )
