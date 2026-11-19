@@ -1,0 +1,32 @@
+name: Run Gemini Cloud Agent
+
+on:
+  workflow_dispatch:
+  schedule:
+    # هر ۶ ساعت یک‌بار به‌صورت خودکار یک نوبت اجرا می‌شود
+    - cron: '0 */6 * * *'
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+          playwright install-deps chromium
+
+      - name: Run Agent
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        # اجرای ایجنت برای حداکثر ۵ ساعت و ۵۰ دقیقه در هر دور تا محدودیت زمانی اکشنز رعایت شود
+        run: timeout 21000 python agent.py || true
