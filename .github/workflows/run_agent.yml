@@ -2,9 +2,10 @@ name: Run Gemini Cloud Agent
 
 on:
   workflow_dispatch:
-  schedule:
-    # هر ۶ ساعت یک‌بار به‌صورت خودکار یک نوبت اجرا می‌شود
-    - cron: '0 */6 * * *'
+  # schedule temporarily disabled to conserve Actions minutes
+  # schedule:
+  #   # هر ۶ ساعت یک‌بار به‌صورت خودکار یک نوبت اجرا می‌شود
+  #   - cron: '0 */6 * * *'
 
 jobs:
   run-agent:
